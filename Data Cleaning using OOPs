@@ -1,0 +1,98 @@
+import pandas as pd, matplotlib.pyplot as plt, numpy as np
+import warnings
+from sklearn.preprocessing import LabelEncoder
+warnings.filterwarnings('ignore')
+pd.options.display.max_columns=100
+pd.options.display.max_rows=999
+
+sample_df= pd.DataFrame({'column1': [-100,2,3,4,5,6,7,8,9,10,1000,np.nan, np.nan],
+                   'column2': [100,200,300,400,500,600,700,800,900,1000,100000,np.nan, np.nan],
+                   'column3': [7,2,7,4,7,6,7,2,4,3,1, np.nan, np.nan],
+                   'column4': ['a','a','c','d','e','f','g','h','i','j','k','l','m'],
+                   'coulmn5': ['excellent','good','excellent','bad','bad','excellent','average','good','excellent','good','good',np.nan,np.nan],
+                   'column6': ['yes','yes','yes','yes','yes','no','no','no','yes','no',np.nan,np.nan,np.nan],
+                   'column7': ['akarsh','vishnu','deepak','deepak','akarsh','akarsh','akarsh','vishnu','deepak','akarsh',np.nan,np.nan,np.nan]})
+
+class NumDataCleaning:
+    
+    #for selecting the imported dataset
+    def __init__ (self,dataframe):        
+        self.dataframe=dataframe
+    
+    #checking if null values are present or not
+    def isnull(self,column):
+        
+        if self.dataframe[column].isnull().sum()>0:
+            return True
+        else:
+            return False
+    
+    def numerical_null_columns(self):
+        
+        #taking only numerical columns from df
+        numerical_columns=self.dataframe.select_dtypes(include=['int64','float64']).columns      
+        
+        #extracting numerical columns with null values
+        num_null_columns=[]
+        for column in numerical_columns:
+            null=self.isnull(column)
+            if null:
+                num_null_columns.append(column)          
+        
+        return num_null_columns
+  
+    def outlier_columns(self):
+        outlier_columns=[]
+        numerical_columns=self.dataframe.select_dtypes(include=['int64','float64']).columns
+
+        for column in numerical_columns:
+            IQR=self.dataframe[column].quantile(0.75) - self.dataframe[column].quantile(0.25)
+            lower_range=self.dataframe[column].quantile(0.25)-(1.5*IQR)
+            higher_range=self.dataframe[column].quantile(0.75)+(1.5*IQR)
+            
+            #appending the columns which are having outliers
+            if self.dataframe[column][self.dataframe[column]<lower_range].count()>0 or self.dataframe[column][self.dataframe[column]>higher_range].count()>0:
+                outlier_columns.append(column)
+        
+        return outlier_columns
+
+    
+    def num_null_imputation(self):
+        
+        for column in self.numerical_null_columns():
+            
+            #if the particular column has null values and outliers
+            if column in self.outlier_columns():
+                self.dataframe[column]=self.dataframe[column].fillna(self.dataframe[column].median())
+            
+            #if the particular column has only null values
+            else:
+                self.dataframe[column]=self.dataframe[column].fillna(self.dataframe[column].mean())
+                
+        return self.dataframe
+    
+    def outliers_imputation(self):       
+        
+        numerical_columns=self.dataframe.select_dtypes(include=['int64','float64']).columns
+        for column in numerical_columns:
+            #calculating iqr,high range,low range for every column
+            IQR=self.dataframe[column].quantile(0.75) - self.dataframe[column].quantile(0.25)
+            lower_range=self.dataframe[column].quantile(0.25)-(1.5*IQR)
+            higher_range=self.dataframe[column].quantile(0.75)+(1.5*IQR)
+            
+            #appending the columns which are having outliers
+            if self.dataframe[column][self.dataframe[column]<lower_range].count()>0 or self.dataframe[column][self.dataframe[column]>higher_range].count()>0:
+
+                #finding values of higher and lower range
+                replace_higher_value=self.dataframe[column].quantile(0.90)
+                replace_lower_value=self.dataframe[column].quantile(0.10)
+                
+                #first treating outliers present above higher range
+                outliers_treated=np.where(self.dataframe[column]>higher_range,replace_higher_value,self.dataframe[column])
+                self.dataframe[column]=pd.DataFrame(outliers_treated)
+                
+                #second treating outliers present below lower range
+                outliers_treatedd=np.where(self.dataframe[column]<lower_range,replace_lower_value,self.dataframe[column])
+                self.dataframe[column]=pd.DataFrame(outliers_treatedd)
+        
+        return self.dataframe
