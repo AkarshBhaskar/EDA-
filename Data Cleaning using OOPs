@@ -96,3 +96,8 @@ class NumDataCleaning:
                 self.dataframe[column]=pd.DataFrame(outliers_treatedd)
         
         return self.dataframe
+        
+class CatDataCleaning(NumDataCleaning):
+
+    #finding categorical columns with null values        
+    def cat_null_columns(self):
