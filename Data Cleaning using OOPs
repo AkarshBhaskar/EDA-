@@ -101,3 +101,38 @@ class CatDataCleaning(NumDataCleaning):
 
     #finding categorical columns with null values        
     def cat_null_columns(self):
+        #taking only categorical columns from df
+        categorical_columns=self.dataframe.select_dtypes(include='object').columns
+        
+        #extracting categorical columns with null values        
+        cat_null_columns=[]
+        for column in categorical_columns:
+            null=self.isnull(column)
+            if null:
+                cat_null_columns.append(column)
+                
+        return cat_null_columns   
+
+    #filling null values with mode imputation    
+    def cat_null_imputation(self):
+        for column in self.cat_null_columns():
+            self.dataframe[column]=self.dataframe[column].fillna(self.dataframe[column].mode()[0])
+        return self.dataframe
+
+    #converting all the character data into numerical for the input of machines
+    def encoding(self):
+        categorical_columns=self.dataframe.select_dtypes(include='object').columns
+        for column in categorical_columns:
+
+            #if the classes of the particular column is between 1-2 then performing one hot encoding
+            if 0 < self.dataframe[column].value_counts().count() < 3:
+                self.one_hot_encoding(column)
+            
+            #if the classes of particular column is between 3-5 then performing label encoding
+            elif 2 < self.dataframe[column].value_counts().count() < 6:
+                self.label_encoding(column)
+            
+            #if the classes are more than 6 then the column is dropped
+            else:
+                self.dataframe.drop(column,axis=1,inplace=True)
+        return self.dataframe
