@@ -97,6 +97,7 @@ class NumDataCleaning:
         
         return self.dataframe
         
+        
 class CatDataCleaning(NumDataCleaning):
 
     #finding categorical columns with null values        
@@ -136,3 +137,30 @@ class CatDataCleaning(NumDataCleaning):
             else:
                 self.dataframe.drop(column,axis=1,inplace=True)
         return self.dataframe
+    
+    #performs one hot encoding on the input column
+    def one_hot_encoding(self,column):
+        dummy=pd.get_dummies(self.dataframe[column],prefix=column)
+        self.dataframe.drop(column,axis=1,inplace=True)
+        self.dataframe=pd.concat([self.dataframe,dummy],axis=1)
+        
+    #performs label encoding for the input column
+    def label_encoding(self,column):
+        label_encoding=LabelEncoder()
+        self.dataframe[column]=label_encoding.fit_transform(self.dataframe[column])
+        
+    #creating the output file to storage
+    def export(self): 
+        self.dataframe.to_csv('A:\Final Project\output.csv')   #exporting file with new name and defining its path
+
+if __name__=='__main__':
+    df=pd.read_excel("A:\datasets\Leads.xlsx")                 #importing file name with its path
+
+    obj1=NumDataCleaning(df)
+    obj1.num_null_imputation()
+    obj1.outliers_imputation()
+
+    obj2=CatDataCleaning(df)
+    obj2.cat_null_imputation()
+    obj2.encoding()    
+    obj2.export()
