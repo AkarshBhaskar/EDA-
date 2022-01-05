@@ -33,7 +33,7 @@ class NumDataCleaning:
         numerical_columns=self.dataframe.select_dtypes(include=['int64','float64']).columns      
         
         #extracting numerical columns with null values
-        num_null_columns=[]
+        num_null_columns=[] #aaaaa
         for column in numerical_columns:
             null=self.isnull(column)
             if null:
