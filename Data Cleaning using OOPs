@@ -29,7 +29,7 @@ class NumDataCleaning:
     
     def numerical_null_columns(self):
         
-        #taking only numerical columns from df
+        #taking only numerical columns from imported df
         numerical_columns=self.dataframe.select_dtypes(include=['int64','float64']).columns      
         
         #extracting numerical columns with null values
