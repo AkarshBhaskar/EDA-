@@ -19,7 +19,7 @@ class NumDataCleaning:
     def __init__ (self,dataframe):        
         self.dataframe=dataframe
     
-    #checking if null values are present or not in a particular column
+    #checking if null values are present or not in a particular column.
     def isnull(self,column):
         
         if self.dataframe[column].isnull().sum()>0:
